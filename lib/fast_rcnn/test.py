@@ -230,12 +230,15 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
     # all detections are collected into:
     #    all_boxes[cls][image] = N x 5 array of detections in
     #    (x1, y1, x2, y2, score)
+    # This is a Matrix of Matrices. Each matrix is an N x 5 (x1, y1, x2, y2, score).
+    # rows are the class#
+    # columns are the image# 
     all_boxes = [[[] for _ in xrange(num_images)]
                  for _ in xrange(imdb.num_classes)]
 
     output_dir = get_output_dir(imdb, net)
 
-    # timers
+    # 2 timers in dictionary mode
     _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
     if not cfg.TEST.HAS_RPN:
@@ -253,6 +256,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
             # ground truth.
             box_proposals = roidb[i]['boxes'][roidb[i]['gt_classes'] == 0]
 
+        # load individual image
         im = cv2.imread(imdb.image_path_at(i))
         _t['im_detect'].tic()
         scores, boxes = im_detect(net, im, box_proposals)

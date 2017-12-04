@@ -51,8 +51,10 @@ def get_minibatch(roidb, num_classes):
         # all_overlaps = []
         for im_i in xrange(num_images):
             labels, overlaps, im_rois, bbox_targets, bbox_inside_weights \
-                = _sample_rois(roidb[im_i], fg_rois_per_image, rois_per_image,
-                               num_classes)
+                = _sample_rois(	roidb[im_i], 
+				int(fg_rois_per_image), 
+				int(rois_per_image),
+                               	int(num_classes))
 
             # Add to RoIs blob
             rois = _project_im_rois(im_rois, im_scales[im_i])
@@ -96,8 +98,9 @@ def _sample_rois(roidb, fg_rois_per_image, rois_per_image, num_classes):
     fg_rois_per_this_image = np.minimum(fg_rois_per_image, fg_inds.size)
     # Sample foreground regions without replacement
     if fg_inds.size > 0:
-        fg_inds = npr.choice(
-                fg_inds, size=fg_rois_per_this_image, replace=False)
+        fg_inds = npr.choice(	fg_inds, 
+				size = int(fg_rois_per_this_image), 
+				replace=False)
 
     # Select background RoIs as those within [BG_THRESH_LO, BG_THRESH_HI)
     bg_inds = np.where((overlaps < cfg.TRAIN.BG_THRESH_HI) &
@@ -109,8 +112,9 @@ def _sample_rois(roidb, fg_rois_per_image, rois_per_image, num_classes):
                                         bg_inds.size)
     # Sample foreground regions without replacement
     if bg_inds.size > 0:
-        bg_inds = npr.choice(
-                bg_inds, size=bg_rois_per_this_image, replace=False)
+        bg_inds = npr.choice(	bg_inds, 
+				size = int(bg_rois_per_this_image), 
+				replace=False)
 
     # The indices that we're selecting (both fg and bg)
     keep_inds = np.append(fg_inds, bg_inds)
@@ -121,8 +125,8 @@ def _sample_rois(roidb, fg_rois_per_image, rois_per_image, num_classes):
     overlaps = overlaps[keep_inds]
     rois = rois[keep_inds]
 
-    bbox_targets, bbox_inside_weights = _get_bbox_regression_labels(
-            roidb['bbox_targets'][keep_inds, :], num_classes)
+    bbox_targets, bbox_inside_weights = _get_bbox_regression_labels(	roidb['bbox_targets'][keep_inds, :], 
+									int(num_classes))
 
     return labels, overlaps, rois, bbox_targets, bbox_inside_weights
 
@@ -173,6 +177,8 @@ def _get_bbox_regression_labels(bbox_target_data, num_classes):
         cls = clss[ind]
         start = 4 * cls
         end = start + 4
+	start = int(start)
+	end = int(end)
         bbox_targets[ind, start:end] = bbox_target_data[ind, 1:]
         bbox_inside_weights[ind, start:end] = cfg.TRAIN.BBOX_INSIDE_WEIGHTS
     return bbox_targets, bbox_inside_weights
