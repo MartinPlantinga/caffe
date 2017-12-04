@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 # --------------------------------------------------------
-# Faster R-CNN
+# Faster R-CNN test with a VGG16 network trained on the COCO dataset
 # Copyright (c) 2015 Microsoft
 # Licensed under The MIT License [see LICENSE for details]
-# Written by Ross Girshick
+# Originally written by Ross Girshick
+# Modified by Martin Plantinga
 # --------------------------------------------------------
 
 """
@@ -26,12 +27,24 @@ import scipy.io as sio
 import caffe, os, sys, cv2
 import argparse
 
-CLASSES = ('__background__',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
-           'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor')
+#import coco toolbox
+from pycocotools.coco import COCO
+import skimage.io as io
+import pylab
+pylab.rcParams['figure.figsize'] = (8.0, 10.0)
+
+dataDir='/hdd/data/mscoco/coco/'
+dataType='val2017'
+annFile='{}/annotations/instances_{}.json'.format(dataDir,dataType)
+# initialize COCO api for instance annotations
+coco=COCO(annFile)
+# load classes from the COCO dataset into the list CLASSES 
+coco=COCO(annFile)
+cats = coco.loadCats(coco.getCatIds())
+CLASSES =['background']
+for cat in cats:
+    CLASSES.append(cat['name'])
+
 
 NETS = {'vgg16': ('VGG16',
                   'VGG16_faster_rcnn_final.caffemodel'),
@@ -97,7 +110,7 @@ def demo(net, image_name):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-        vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        vis_detections(im, str(cls), dets, thresh=CONF_THRESH)
 
 def parse_args():
     """Parse input arguments."""
@@ -119,14 +132,14 @@ if __name__ == '__main__':
 
     args = parse_args()
 
-    prototxt = os.path.join(cfg.MODELS_DIR, 
-                            NETS[args.demo_net][0],
-                            'faster_rcnn_alt_opt', 
-                            'faster_rcnn_test.pt')
+    prototxt = os.path.join(cfg.ROOT_DIR, 'models', 'coco', 'ResNet50','faster_rcnn_end2end', 'test.prototxt') 
+    
     print prototxt
-    caffemodel = os.path.join(  cfg.DATA_DIR, 
-                                'faster_rcnn_models',
-                                NETS[args.demo_net][1])
+    # caffemodel = os.path.join('/home/rdlm/martin_py_faster_rcnn/output/faster_rcnn_end2end/coco_2014_train/resnet_faster_rcnn_iter_320000.caffemodel')
+    caffemodel = os.path.join('/hdd/data/trained_networks/resnet/ResNet-50-model.caffemodel')
+   
+
+
 
     if not os.path.isfile(caffemodel):
         raise IOError(('{:s} not found.\nDid you run ./data/script/'
