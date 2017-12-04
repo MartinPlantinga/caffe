@@ -1,5 +1,31 @@
 ### Disclaimer
 
+#### Modifications to Caffe
+This repository is a reimplementation of the py-faster-rcnn, the original can be found [here](https://github.com/rbgirshick/py-faster-rcnn). This repository includes a modified version of the latest version of Caffe [version 1.0](https://github.com/BVLC/caffe/tree/1.0).
+
+The modifications made to this Caffe version 1.0 are:
+ 1. Rename the Caffe directory as caffe-fast-rcnn
+ 2. Add RoI Pooling layers from the [py-faster-rcnn](https://github.com/rbgirshick/py-faster-rcnn) repository
+  - py-faster-rcnn/caffe-fast-rcnn/src/caffe/layers/roi_pooling_layer.cpp
+  - py-faster-rcnn/caffe-fast-rcnn/src/caffe/layers/roi_pooling_layer.cu
+  - py-faster-rcnn/caffe-fast-rcnn/include/caffe/fast_rcnn_layers.hpp
+  - declare the corresponding layers in martin_py_faster_rcnn/caffe-fast-rcnn/src/caffe/proto/caffe.proto
+ 3. Add RoI Alignment layers from the [affordance-net](https://github.com/nqanh/affordance-net) repository:
+  - affordance-net/caffe-affordance-net/src/caffe/layers/roi_alignment_layer.cpp
+  - affordance-net/caffe-affordance-net/src/caffe/layers/roi_alignment_layer.cu
+  - affordance-net/caffe-affordance-net/include/caffe/roi_alignment_layers.hpp
+  - declare the corresponding layers in martin_py_faster_rcnn/caffe-fast-rcnn/src/caffe/proto/caffe.proto
+
+#### Modifications to py-faster-rcnn
+All directories (except for caffe-fast-rcnn) are copied from the original py-faster-rcnn repository. Some modifications are made to the `lib/rpn/proposal_layer.py` script to allow it to work with the new version of Caffe:
+ 1. change the variable name `self.param_str_` to `self.param_str`.
+ 2. change the `cfg_key variable` as follows:
+  ```
+  cfg_key = 'TEST' if self.phase == 1 else 'TRAIN'
+  #cfg_key = str(self.phase) # either 'TRAIN' or 'TEST'
+  ```
+  
+#### Official Faster R-CNN code
 The official Faster R-CNN code (written in MATLAB) is available [here](https://github.com/ShaoqingRen/faster_rcnn).
 If your goal is to reproduce the results in our NIPS 2015 paper, please use the [official code](https://github.com/ShaoqingRen/faster_rcnn).
 
@@ -76,7 +102,7 @@ If you find Faster R-CNN useful in your research, please consider citing:
 1. Clone the Faster R-CNN repository
   ```Shell
   # Make sure to clone with --recursive
-  git clone --recursive https://github.com/rbgirshick/py-faster-rcnn.git
+  git clone --recursive https://github.com/MartinPlantinga/martin_py_faster_rcnn.git
   ```
 
 2. We'll call the directory that you cloned Faster R-CNN into `FRCN_ROOT`
